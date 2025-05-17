@@ -12,8 +12,26 @@
 <body>
     <div class="container">
         <h1>R&D Claim Pre-Notification Checker</h1>
-        <div id="app"></div>
+        <div id="app">
+            <!-- Question 1 -->
+            <div id="q1" class="question">
+                <p>Have you claimed for R&D relief before?</p>
+                <button type="button" data-answer="yes">Yes</button>
+                <button type="button" data-answer="no">No</button>
+            </div>
+            <!-- Question 2 -->
+            <div id="q2" class="question">
+                <p>On what date did you file the last claim?</p>
+                <input type="date" id="lastClaim" name="lastClaim" />
+                <button type="button" data-next>Next</button>
+            </div>
+            <!-- Result -->
+            <div id="result" class="result-output">
+                <p id="pnfResult" class="result-output__text"></p>
+            </div>
+        </div>
     </div>
+    <script src="scripts/main.js" type="module"></script>
 </body>
 
 </html>
