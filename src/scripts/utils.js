@@ -21,7 +21,7 @@ export function qsa(selector) {
  * @param { string } element                The element string
  * @param { string } [displayType='block']  The display type string
  */
-export function showElement(element, displayType = "block") {
+export function showElement(element, displayType = 'block') {
     if (element) element.style.display = displayType;
 }
 
@@ -31,7 +31,7 @@ export function showElement(element, displayType = "block") {
  * @returns { void }            Sets the display style to none
  */
 export function hideElement(element) {
-    if (element) element.style.display = "none";
+    if (element) element.style.display = 'none';
 }
 
 /**
@@ -44,18 +44,13 @@ export function hideElement(element) {
  */
 export function on(container, eventType, selector, handler) {
     if (!container) {
-        console.error("Container not found for event binding.");
+        console.error('Container not found for event binding.');
         return;
     }
     container.addEventListener(eventType, (event) => {
         const targetElement = event.target;
 
-        if (
-            targetElement &&
-            typeof targetElement.matches === "function" &&
-            targetElement.matches(selector)
-        )
-            handler(event);
+        if (targetElement && typeof targetElement.matches === 'function' && targetElement.matches(selector)) handler(event);
     });
 }
 
@@ -88,12 +83,10 @@ function isValidDateObject(date) {
  */
 export function toUTC(date) {
     if (!isValidDateObject(date)) {
-        console.error("Invalid date provided to toUTC:", date);
+        console.error('Invalid date provided to toUTC:', date);
         return null;
     }
-    return new Date(
-        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-    );
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 /**
@@ -135,7 +128,7 @@ export function subtractYearsUTC(dateUTC, n) {
 function _findErrorSpan(inputId) {
     const errorSpan = qs(`[data-for-input="${inputId}"]`);
 
-    if (!errorSpan) console.warn("Error span not found for input:", inputId);
+    if (!errorSpan) console.warn('Error span not found for input:', inputId);
 
     return errorSpan;
 }
@@ -146,7 +139,7 @@ function _findErrorSpan(inputId) {
  * @private
  */
 function _clearError(errorSpanElement) {
-    if (errorSpanElement) errorSpanElement.textContent = "";
+    if (errorSpanElement) errorSpanElement.textContent = '';
 }
 
 /**
@@ -164,10 +157,9 @@ function _displayError(errorSpanElement, message) {
  * @param {string} errorMessage                         The error message
  * @returns {{date: Date | null, error: string | null}} Result object with either a date or an error message.
  * @private
-*/
+ */
 function _formatErrorMessagePart(errorMessage) {
-    if (errorMessage.toLowerCase().startsWith("please"))
-        return errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1);
+    if (errorMessage.toLowerCase().startsWith('please')) return errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1);
 
     return errorMessage;
 }
@@ -197,7 +189,7 @@ function _validateAndParseDate(inputValue, baseErrorMessage) {
  */
 export function requireDateInput(inputElement, errorMsgText) {
     if (!inputElement) {
-        console.error("Input element not provided to requireDateInput");
+        console.error('Input element not provided to requireDateInput');
         return null;
     }
 
@@ -209,10 +201,7 @@ export function requireDateInput(inputElement, errorMsgText) {
         return null;
     }
 
-    const validationResult = _validateAndParseDate(
-        inputElement.value,
-        errorMsgText
-    );
+    const validationResult = _validateAndParseDate(inputElement.value, errorMsgText);
 
     if (validationResult.error) {
         _displayError(errorSpan, validationResult.error);

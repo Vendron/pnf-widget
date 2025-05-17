@@ -1,20 +1,25 @@
 {
-  "name": "pnf-widget",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Vendron/pnf-widget.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Vendron/pnf-widget/issues"
-  },
-  "homepage": "https://github.com/Vendron/pnf-widget#readme"
+    "name": "pnf-widget",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start:dev": "npx serve src -l 3000",
+        "format": "prettier --write \"src/**/*.{js,html,css}\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Vendron/pnf-widget.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Vendron/pnf-widget/issues"
+    },
+    "homepage": "https://github.com/Vendron/pnf-widget#readme",
+    "devDependencies": {
+        "prettier": "^3.5.3",
+        "prettier-plugin-organize-imports": "^4.1.0"
+    }
 }

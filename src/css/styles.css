@@ -79,7 +79,7 @@ body {
     box-shadow: 0 0 3px var(--color-secondary);
 }
 
-button.question__button[data-action="next"] {
+button.question__button[data-action='next'] {
     display: block;
     margin-top: var(--spacing-m);
     margin-left: auto;

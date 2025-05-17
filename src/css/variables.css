@@ -1,17 +1,17 @@
 :root {
     /* Colour */
-    --color-bg-body: #F8F4F6;
-    --color-text-body: #0D2D57;
-    --color-bg-container: #F9F9F9;
-    --color-primary: #08174D;
-    --color-secondary: #3A82F7;
-    --color-secondary-dark: #196CF3;
+    --color-bg-body: #f8f4f6;
+    --color-text-body: #0d2d57;
+    --color-bg-container: #f9f9f9;
+    --color-primary: #08174d;
+    --color-secondary: #3a82f7;
+    --color-secondary-dark: #196cf3;
     --color-border-light: #ddd;
     --color-bg-alt: #f9f9f9;
     --color-border-input: #ccc;
     --color-bg-result: #eaf5ff;
     --color-text-light: white;
-    --color-error: #F31919;
+    --color-error: #f31919;
 
     /* Spacing */
     --spacing-xxs: 5px;

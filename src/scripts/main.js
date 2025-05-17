@@ -1,6 +1,6 @@
-import { PNFFlow } from "./flow.js";
+import { PNFFlow } from './flow.js';
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     const pnfWidget = new PNFFlow();
 
     pnfWidget.init();
