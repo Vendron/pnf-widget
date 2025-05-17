@@ -1,0 +1,13 @@
+@import url('variables.css');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--color-bg-body);
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 1rem;
+}
