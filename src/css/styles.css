@@ -1,5 +1,5 @@
 @import url('variables.css');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 body {
     font-family: 'Poppins', sans-serif;
@@ -26,12 +26,10 @@ body {
 .container__title {
     color: var(--color-primary);
     text-align: center;
-    margin-bottom: var(--spacing-xl);
 }
 
 .container__description {
     text-align: center;
-    margin-bottom: var(--spacing-l);
 }
 
 .question {
@@ -47,7 +45,8 @@ body {
 .question__text {
     margin-top: 0;
     margin-bottom: var(--spacing-m);
-    font-size: 1.1em;
+    font-weight: 400;
+    font-size: 1.2em;
 }
 
 .question__label {
