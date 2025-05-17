@@ -11,6 +11,7 @@
     --color-border-input: #ccc;
     --color-bg-result: #eaf5ff;
     --color-text-light: white;
+    --color-error: #F31919;
 
     /* Spacing */
     --spacing-xxs: 5px;

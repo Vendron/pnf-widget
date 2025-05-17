@@ -127,34 +127,97 @@ export function subtractYearsUTC(dateUTC, n) {
 }
 
 /**
- * @brief                       Validate date inputted, error message if invalid
- * @param {string} inputValue   The date string
- * @returns {Object}            The date object or null if invalid
+ * @brief                           Find the error span associated with a given input element ID
+ * @param {string} inputId          The ID of the input element
+ * @returns {HTMLElement | null}    The error span element or null if not found
+ * @private
  */
-function _validateAndParseDate(inputValue) {
+function _findErrorSpan(inputId) {
+    const errorSpan = qs(`[data-for-input="${inputId}"]`);
+
+    if (!errorSpan) console.warn("Error span not found for input:", inputId);
+
+    return errorSpan;
+}
+
+/**
+ * @brief                                       Clear the error message from an error span
+ * @param {HTMLElement | null} errorSpanElement The error span element
+ * @private
+ */
+function _clearError(errorSpanElement) {
+    if (errorSpanElement) errorSpanElement.textContent = "";
+}
+
+/**
+ * @brief                                       Display an error message in an error span
+ * @param {HTMLElement | null} errorSpanElement The error span element
+ * @param {string} message                      The error message to display
+ * @private
+ */
+function _displayError(errorSpanElement, message) {
+    if (errorSpanElement) errorSpanElement.textContent = message;
+}
+
+/**
+ * @brief                                               Format error message part
+ * @param {string} errorMessage                         The error message
+ * @returns {{date: Date | null, error: string | null}} Result object with either a date or an error message.
+ * @private
+*/
+function _formatErrorMessagePart(errorMessage) {
+    if (errorMessage.toLowerCase().startsWith("please"))
+        return errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1);
+
+    return errorMessage;
+}
+
+/**
+ * @brief                           Validate date inputted, error message if invalid
+ * @param {string} inputValue       The date string
+ * @param {string} baseErrorMessage The base error message
+ * @returns {Object}                The date object or null if invalid
+ */
+function _validateAndParseDate(inputValue, baseErrorMessage) {
     const dateValue = parseDate(inputValue);
 
-    if (dateValue) return { date: dateValue };
+    if (dateValue) return { date: dateValue, error: null };
 
-    return { date: null };
+    const messagePart = _formatErrorMessagePart(baseErrorMessage);
+    const specificError = `Invalid date format. ${messagePart}`;
+
+    return { date: null, error: specificError };
 }
 
 /**
  * @brief                                   Validate date inputted, error message if invalid
  * @param {HTMLInputElement} inputElement   The date input HTML element
+ * @param {string} errorMsgText             The error message text
  * @returns {Date | null}                   The parsed and validated Date object or null if validation fails
  */
-export function requireDateInput(inputElement) {
+export function requireDateInput(inputElement, errorMsgText) {
     if (!inputElement) {
         console.error("Input element not provided to requireDateInput");
         return null;
     }
 
-    if (!inputElement.value) return null;
+    const errorSpan = _findErrorSpan(inputElement.id);
+    _clearError(errorSpan);
 
-    const validationResult = _validateAndParseDate(inputElement.value);
+    if (!inputElement.value) {
+        _displayError(errorSpan, errorMsgText);
+        return null;
+    }
 
-    if (validationResult.error) return null;
+    const validationResult = _validateAndParseDate(
+        inputElement.value,
+        errorMsgText
+    );
+
+    if (validationResult.error) {
+        _displayError(errorSpan, validationResult.error);
+        return null;
+    }
 
     return validationResult.date;
 }

@@ -25,6 +25,7 @@
                 <div id="question2" class="question">
                     <p class="question__text">On what date did you file the last claim?</p>
                     <input type="date" id="lastClaimFilingDate" name="lastClaimFilingDate" class="question__input">
+                    <span class="error-message" data-for-input="lastClaimFilingDate"></span>
                     <button type="button" class="question__button" data-action="next">Next</button>
                 </div>
 
@@ -33,8 +34,11 @@
                     </p>
                     <label for="cpStartDate" class="question__label">Start Date:</label>
                     <input type="date" id="cpStartDate" name="cpStartDate" class="question__input">
+                    <span class="error-message" data-for-input="cpStartDate"></span>
+
                     <label for="cpEndDate" class="question__label">End Date:</label>
                     <input type="date" id="cpEndDate" name="cpEndDate" class="question__input">
+                    <span class="error-message" data-for-input="cpEndDate"></span>
                     <button type="button" class="question__button" data-action="next">Next</button>
                 </div>
 

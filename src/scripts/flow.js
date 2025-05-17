@@ -14,15 +14,15 @@ export class PNFFlow {
     static NO_PNF_REQUIRED = "No PNF Required";
 
     /**
-     * @brief                                   Initializes the PNFFlow instance.
-     * @property {string[]} [questionIds]       IDs of question containers in order.
-     * @property {string} [resultId]            ID of the result container.
-     * @property {string} [resultTextId]        ID of the paragraph for result text.
-     * @property {Object.<string, string>} [inputIds] Map of logical names to input IDs.
+     * @brief                                           Initializes the PNFFlow instance.
+     * @property {string[]} [questionIds]               IDs of question containers in order.
+     * @property {string} [resultId]                    ID of the result container.
+     * @property {string} [resultTextId]                ID of the paragraph for result text.
+     * @property {Object.<string, string>} [inputIds]   Map of logical names to input IDs.
      */
 
     /**
-     * @brief                   Constructs a PNFFlow instance.
+     * @brief                               Constructs a PNFFlow instance.
      * @param {PNFFlowOptions} [options={}] Configuration options for the flow.
      */
     constructor({
@@ -153,9 +153,9 @@ export class PNFFlow {
      * @param {string} errorMsgText Message to show if input is missing or invalid.
      * @returns {Date | null}       The UTC date or null if invalid.
      */
-    getValidatedUTCDate(inputKey) {
+    getValidatedUTCDate(inputKey, errorMsgText) {
         const inputElement = this.inputs[inputKey];
-        const localDate = requireDateInput(inputElement);
+        const localDate = requireDateInput(inputElement, errorMsgText);
         return localDate ? toUTC(localDate) : null;
     }
 
