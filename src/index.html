@@ -5,31 +5,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>R&D Claim Pre-Notification Tool</title>
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="container">
-        <h1>R&D Claim Pre-Notification Checker</h1>
-        <div id="app">
-            <!-- Question 1 -->
-            <div id="q1" class="question">
-                <p>Have you claimed for R&D relief before?</p>
-                <button type="button" data-answer="yes">Yes</button>
-                <button type="button" data-answer="no">No</button>
+        <h1 class="container__title">R&D Claim Pre-Notification Checker</h1>
+        <p class="container__description">Check if you are eligible for R&D relief quickly and easily</p>
+
+        <form id="pnfForm">
+            <div id="questionContainer">
+                <div id="question1" class="question active">
+                    <p class="question__text">Have you claimed for R&D relief before?</p>
+                    <button type="button" class="question__button" data-answer="yes">Yes</button>
+                    <button type="button" class="question__button" data-answer="no">No</button>
+                </div>
+
+                <div id="question2" class="question">
+                    <p class="question__text">On what date did you file the last claim?</p>
+                    <input type="date" id="lastClaimFilingDate" name="lastClaimFilingDate" class="question__input">
+                    <button type="button" class="question__button" data-action="next">Next</button>
+                </div>
+
+                <div id="question3" class="question">
+                    <p class="question__text">Enter the start and end dates of the accounting period for the last claim.
+                    </p>
+                    <label for="cpStartDate" class="question__label">Start Date:</label>
+                    <input type="date" id="cpStartDate" name="cpStartDate" class="question__input">
+                    <label for="cpEndDate" class="question__label">End Date:</label>
+                    <input type="date" id="cpEndDate" name="cpEndDate" class="question__input">
+                    <button type="button" class="question__button" data-action="next">Next</button>
+                </div>
+
+                <div id="question4" class="question">
+                    <p class="question__text">Was the claim filed as an amended tax return or with the original
+                        submission?</p>
+                    <button type="button" class="question__button" data-submission="amended">Amended Submission</button>
+                    <button type="button" class="question__button" data-submission="original">Original
+                        Submission</button>
+                </div>
+
+                <div id="question5" class="question">
+                    <p class="question__text">Have you ever claimed before this?</p>
+                    <button type="button" class="question__button" data-everclaimed="yes">Yes</button>
+                    <button type="button" class="question__button" data-everclaimed="no">No</button>
+                </div>
             </div>
-            <!-- Question 2 -->
-            <div id="q2" class="question">
-                <p>On what date did you file the last claim?</p>
-                <input type="date" id="lastClaim" name="lastClaim" />
-                <button type="button" data-next>Next</button>
-            </div>
-            <!-- Result -->
+
             <div id="result" class="result-output">
                 <p id="pnfResult" class="result-output__text"></p>
             </div>
-        </div>
+        </form>
     </div>
     <script src="scripts/main.js" type="module"></script>
 </body>

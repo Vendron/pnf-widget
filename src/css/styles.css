@@ -1,13 +1,160 @@
 @import url('variables.css');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: var(--color-bg-body);
+    background-color: var(--color-bg-body);
+    color: var(--color-text-body);
+    margin: 0;
+    padding: var(--spacing-l);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
+    background-color: var(--color-bg-container);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
     max-width: 600px;
-    margin: auto;
-    padding: 1rem;
+    text-align: center;
+}
+
+.container__title {
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.container__description {
+    text-align: center;
+    margin-bottom: var(--spacing-l);
+}
+
+.question {
+    margin-bottom: var(--spacing-l);
+    padding: var(--spacing-m);
+    display: none;
+}
+
+.question.active {
+    display: block;
+}
+
+.question__text {
+    margin-top: 0;
+    margin-bottom: var(--spacing-m);
+    font-size: 1.1em;
+}
+
+.question__label {
+    display: block;
+    width: 70%;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 700;
+    text-align: left;
+    padding-left: var(--spacing-s);
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.question__input {
+    width: 70%;
+    padding: var(--spacing-s);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--border-radius-medium);
+    box-sizing: border-box;
+    font-size: inherit;
+    font-family: inherit;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.question__input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 3px var(--color-secondary);
+}
+
+button.question__button[data-action="next"] {
+    display: block;
+    margin-top: var(--spacing-m);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.question__button,
+.container__button {
+    background-color: var(--color-secondary);
+    color: var(--color-text-light);
+    font-weight: 700;
+    border: none;
+    padding: 12px var(--spacing-l);
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1em;
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: var(--spacing-s);
+    margin-top: var(--spacing-s);
+}
+
+.question__button:last-child,
+.container__button:last-child {
+    margin-right: 0;
+}
+
+.question__button:hover,
+.container__button:hover {
+    background-color: var(--color-secondary-dark);
+}
+
+.result-output {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-l);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--color-secondary);
+    text-align: center;
+    display: none;
+}
+
+.result-output__text {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: var(--spacing-s);
+    }
+
+    .container {
+        padding: var(--spacing-m);
+    }
+
+    .question__button,
+    .container__button {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: var(--spacing-s);
+    }
+
+    .question__button:last-child,
+    .container__button:last-child {
+        margin-bottom: 0;
+    }
+
+    .question__input {
+        width: 100%;
+    }
 }
