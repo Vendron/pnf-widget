@@ -110,20 +110,98 @@ export class WidgetView {
     }
 
     /**
-     * @brief                   Displays the final result message
-     * @param {string} message  The message to display
+     * @brief                                   Displays the final result message.
+     * @param {boolean} isPNFRequired           Whether PNF is required.
+     * @param {Date | null} [nextClaimPeriod]   (Optional) The start date of the next claim period.
+     * @param {Date | null} [endOfCNP]          (Optional) The end date of the Claim Notification Period.
      * @returns {void}
      */
-    showResult(message) {
+    showResult(isPNFRequired, nextClaimPeriod = null, endOfCNP = null) {
         this.hideAllQuestions();
 
-        if (this.resultTextEl) {
-            this.resultTextEl.textContent = message;
-        } else {
-            console.warn('WidgetView: Cannot display result message, resultTextEl is not found.');
+        if (!this.resultTextEl && this.resultEl) {
+            console.warn(
+                `WidgetView: Result text element (#${this.resultTextId}) not found. Displaying empty result container.`
+            );
+            this.resultEl.classList.remove('result-output--danger', 'result-output--success');
+            this.showElement(this.resultEl);
+            return;
         }
 
-        if (this.resultEl) this.showElement(this.resultEl);
+        if (!this.resultTextEl) {
+            console.warn(`WidgetView: Result text element (#${this.resultTextId}) not found. Cannot set result message.`);
+            return;
+        }
+
+        if (!this.resultEl) {
+            console.warn(`WidgetView: Result container element (#${this.resultId}) not found. Cannot display result.`);
+            return;
+        }
+
+        this.resultEl.classList.remove('result-output--danger', 'result-output--success');
+
+        let html = '';
+        if (isPNFRequired === true) {
+            this.resultEl.classList.add('result-output--danger');
+            html = this._generatePNFRequiredHTML(nextClaimPeriod, endOfCNP);
+        }
+        if (isPNFRequired === false) {
+            this.resultEl.classList.add('result-output--success');
+            html = this._generateNoPNFRequiredHTML();
+        }
+
+        this.resultTextEl.innerHTML = html;
+        this.showElement(this.resultEl);
+    }
+
+    /**
+     * @brief                               Generates the HTML for the "PNF Required" result.
+     * @param {Date | null} nextClaimPeriod The start date of the next claim period.
+     * @param {Date | null} endOfCNP        The end date of the Claim Notification Period.
+     * @returns {string}                    The HTML string for the result.
+     * @private
+     */
+    _generatePNFRequiredHTML(nextClaimPeriod, endOfCNP) {
+        const title = 'PNF Required.';
+        let descContent = 'You will need to prenotify HMRC for your next R&D claim.';
+
+        if (nextClaimPeriod && endOfCNP) {
+            descContent += ` For <span class="result-output__date">${formatDate(
+                nextClaimPeriod
+            )}</span>, you need to submit the prenotification form by <span class="result-output__date">${formatDate(
+                endOfCNP
+            )}</span>.`;
+        }
+        descContent += ' <a href="#" class="container__button">Click here to use our handy tool!</a>';
+
+        return `
+            <div class="result-output__title-container">
+                <span class="result-output__title">${title}</span>
+            </div>
+            <div class="result-output__desc-container">
+                <span class="result-output__desc">${descContent}</span>
+            </div>
+        `;
+    }
+
+    /**
+     * @brief               Generates the HTML for the "No PNF Required" result.
+     * @returns {string}    The HTML string for the result.
+     * @private
+     */
+    _generateNoPNFRequiredHTML() {
+        const title = 'No PNF Required.';
+        const descContent =
+            'You do not need to submit a prenotification form to HMRC for your next claim. However, if you would like to anyway you can use our tool <a href="#" class="container__button">here!</a>';
+
+        return `
+            <div class="result-output__title-container">
+                <span class="result-output__title">${title}</span>
+            </div>
+            <div class="result-output__desc-container">
+                <span class="result-output__desc">${descContent}</span>
+            </div>
+        `;
     }
 
     /**
@@ -279,56 +357,5 @@ export class WidgetView {
     initialRender() {
         this.hideAllQuestions();
         if (this.resultEl) this.hideElement(this.resultEl);
-    }
-
-    /**
-     * @brief                                       Displays the final result message with title and description
-     * @param {Object} options                      The options for the result
-     * @param {boolean} options.isPNFRequired       Whether PNF is required
-     * @param {Date|null} options.nextClaimPeriod   The next claim period start date
-     * @param {Date|null} options.endOfCNP          The end of the CNP period
-     * @returns {void}
-     */
-    showDecisionResult({ isPNFRequired, nextClaimPeriod, endOfCNP }) {
-        this.hideAllQuestions();
-        if (!this.resultEl || !this.resultTextEl) return;
-        this.resultEl.classList.remove('result-output--success', 'result-output--danger');
-        if (isPNFRequired) {
-            this._showPNFRequired(nextClaimPeriod, endOfCNP);
-            return;
-        }
-        this._showNoPNFRequired();
-    }
-
-    /**
-     * @brief                               Shows the PNF Required result message
-     * @param {Date|null} nextClaimPeriod   The next claim period start date
-     * @param {Date|null} endOfCNP          The end of the CNP period
-     * @returns {void}
-     */
-    _showPNFRequired(nextClaimPeriod, endOfCNP) {
-        const title = 'PNF Required.';
-        let message = 'You will need to prenotify HMRC for your next R&D claim.';
-
-        if (nextClaimPeriod && endOfCNP)
-            message += ` For <span class="result-output__date">${formatDate(nextClaimPeriod)}</span>, you need to submit the prenotification form by <span class="result-output__date">${this.formatDate(endOfCNP)}</span>.`;
-
-        message += ' Click here to use our handy tool!';
-        this.resultEl.classList.add('result-output--danger');
-        this.resultTextEl.innerHTML = `<div class="result-output__title">${title}</div><div class="result-output__desc">${message}</div>`;
-        this.showElement(this.resultEl);
-    }
-
-    /**
-     * @brief           Shows the No PNF Required result message
-     * @returns {void}
-     */
-    _showNoPNFRequired() {
-        const title = 'No PNF Required.';
-        const message =
-            'You do not need to submit a prenotification form to HMRC for your next claim. However, if you would like to anyway you can use our tool here!';
-        this.resultEl.classList.add('result-output--success');
-        this.resultTextEl.innerHTML = `<div class="result-output__title">${title}</div><div class="result-output__desc">${message}</div>`;
-        this.showElement(this.resultEl);
     }
 }

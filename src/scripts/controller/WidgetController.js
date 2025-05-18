@@ -92,7 +92,7 @@ export class WidgetController {
             this.view.showQuestion(1);
             return;
         }
-        this.view.showResult(ClaimLogic.PNF_REQUIRED);
+        this.view.showResult(true);
     }
 
     /**
@@ -156,12 +156,22 @@ export class WidgetController {
         const cpStartTime = this.cpStartDate.getTime();
 
         if (lastFilingTime < cnpStartTime) {
-            this.view.showResult(ClaimLogic.PNF_REQUIRED);
+            this.view.showResult(true, this.cpStartDate, this.cnpEndDate);
             return;
         }
 
         if (lastFilingTime > cnpEndTime && lastFilingTime < april1_2023_Time) {
-            this.view.showResult(ClaimLogic.NO_PNF_REQUIRED);
+            this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
+            return;
+        }
+
+        if (lastFilingTime > cnpEndTime && lastFilingTime >= april1_2023_Time && cpStartTime < april1_2023_Time) {
+            this.view.showQuestion(3);
+            return;
+        }
+
+        if (lastFilingTime > cnpEndTime && lastFilingTime >= april1_2023_Time) {
+            this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
             return;
         }
 
@@ -174,8 +184,8 @@ export class WidgetController {
         relevantFilingWindowStart.setUTCDate(relevantFilingWindowStart.getUTCDate() + 1);
         const relevantFilingWindowStartTime = relevantFilingWindowStart.getTime();
 
-        if (lastFilingTime < relevantFilingWindowStartTime || lastFilingTime > cnpEndTime) {
-            this.view.showResult(ClaimLogic.PNF_REQUIRED);
+        if (lastFilingTime < relevantFilingWindowStartTime) {
+            this.view.showResult(true, this.cpStartDate, this.cnpEndDate);
             return;
         }
 
@@ -184,7 +194,7 @@ export class WidgetController {
             return;
         }
 
-        this.view.showResult(ClaimLogic.NO_PNF_REQUIRED);
+        this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
     }
 
     /**
@@ -194,7 +204,7 @@ export class WidgetController {
      */
     handleQ4Submission(submissionType) {
         if (submissionType === 'amended') this.view.showQuestion(4);
-        if (submissionType === 'original') this.view.showResult(ClaimLogic.NO_PNF_REQUIRED);
+        if (submissionType === 'original') this.view.showResult(false);
     }
 
     /**
@@ -209,6 +219,6 @@ export class WidgetController {
             this.view.showQuestion(1);
             return;
         }
-        this.view.showResult(ClaimLogic.PNF_REQUIRED);
+        this.view.showResult(true);
     }
 }
