@@ -139,17 +139,117 @@ export class PNFFlow {
     }
 
     /**
-     * @brief   Handles the action for Question 2.
+     * @brief                                                   Validates claim period start and end dates.
+     * @returns {{cpStartDate: Date, cpEndDate: Date} | null}   Returns validated dates or null if invalid.
+     */
+    validateClaimPeriodDates() {
+        const cpStartDate = this.getValidatedUTCDate('cpStart', 'Please enter the claim period start date.');
+        const cpEndDate = this.getValidatedUTCDate('cpEnd', 'Please enter the claim period end date.');
+
+        if (!cpStartDate || !cpEndDate) {
+            alert('Please enter both the claim period start and end dates.');
+            return null;
+        }
+        if (cpStartDate.getTime() >= cpEndDate.getTime()) {
+            alert('The claim period start date must be before the end date.');
+            return null;
+        }
+        return { cpStartDate, cpEndDate };
+    }
+
+    /**
+     * @brief                                           Calculates the Claim Notification Period (CNP) start and end dates.
+     * @param {Date} cpStartDate                        Claim period start date
+     * @param {Date} cpEndDate                          Claim period end date
+     * @returns {{cnpStart: Date, cnpEnd: Date} | null} Returns CNP start and end dates or null if an error occurs.
+     */
+    calculateCNP(cpStartDate, cpEndDate) {
+        const cnpEnd = addMonthsUTC(cpEndDate, 6);
+        if (!cnpEnd) {
+            alert('Could not calculate Claim Notification Period End Date.');
+            return null;
+        }
+        return { cnpStart: cpStartDate, cnpEnd };
+    }
+
+    /**
+     * @brief                       Determines if PNF is required (last filing before CNP start).
+     * @param {Date} lastFilingDate Last filing date
+     * @param {Date} cnpStart       The start date of the Claim Notification Period (CNP)
+     * @returns {boolean}           True if PNF is required, false otherwise
+     */
+    shouldRequirePNF(lastFilingDate, cnpStart) {
+        return lastFilingDate.getTime() < cnpStart.getTime();
+    }
+
+    /**
+     * @brief                       Determines if should go to question 3 (last filing after CNP end and after April 1, 2023).
+     * @param {Date} lastFilingDate Last filing date
+     * @param {Date} cnpEnd         The end date of the Claim Notification Period (CNP)
+     * @param {Date} april1_2023    The reference date (April 1, 2023)
+     * @returns {boolean}           True if should go to question 3, false otherwise
+     */
+    shouldGoToQuestion3(lastFilingDate, cnpEnd, april1_2023) {
+        return lastFilingDate.getTime() > cnpEnd.getTime() && lastFilingDate.getTime() >= april1_2023.getTime();
+    }
+
+    /**
+     * @brief                       Determines if should show No PNF Required (last filing after CNP end and before April 1, 2023).
+     * @param {Date} lastFilingDate Last filing date
+     * @param {Date} cnpEnd         The end date of the Claim Notification Period (CNP)
+     * @param {Date} april1_2023    The reference date (April 1, 2023)
+     * @returns {boolean}           True if no PNF is required, false otherwise
+     */
+    shouldShowNoPNFRequired(lastFilingDate, cnpEnd, april1_2023) {
+        return lastFilingDate.getTime() > cnpEnd.getTime() && lastFilingDate.getTime() < april1_2023.getTime();
+    }
+
+    /**
+     * @brief       Handles the action for Question 2.
+     * @description Validates the last claim filing date and claim period dates, checks if the last filing date is within the relevant window,
+     *              and determines if PNF is required.
+     *              If the last filing date is before the CNP start date, it shows the result as PNF Required.
+     *              If the last filing date is after the CNP end date and after April 1, 2023, it shows Question 3.
+     *              If the last filing date is after the CNP end date and before April 1, 2023, it shows the result as No PNF Required.
+     *              Otherwise, it shows Question 2 again.
      * @returns {void}
      */
     handleQ2() {
         const lastFilingDate = this.getValidatedUTCDate('lastFiling', 'Please enter the date you filed the last claim.');
         if (!lastFilingDate) return;
+
+        const claimPeriod = this.validateClaimPeriodDates();
+        if (!claimPeriod) return;
+
+        const cnp = this.calculateCNP(claimPeriod.cpStartDate, claimPeriod.cpEndDate);
+        if (!cnp) return;
+
+        const april1_2023 = this.APRIL_1_2023_UTC;
+        if (!april1_2023) {
+            alert('Critical application error: Reference date not set.');
+            return;
+        }
+
+        if (this.shouldRequirePNF(lastFilingDate, cnp.cnpStart)) {
+            this.showResult(PNFFlow.PNF_REQUIRED);
+            return;
+        }
+        if (this.shouldGoToQuestion3(lastFilingDate, cnp.cnpEnd, april1_2023)) {
+            this.showQuestion(2);
+            return;
+        }
+        if (this.shouldShowNoPNFRequired(lastFilingDate, cnp.cnpEnd, april1_2023)) {
+            this.showResult(PNFFlow.NO_PNF_REQUIRED);
+            return;
+        }
+
         this.showQuestion(2);
     }
 
     /**
-     * @brief   Handles the action for Question 3
+     * @brief       Handles the action for Question 3
+     * @description Validates the last claim filing date and claim period dates, checks if the last filing date is within the relevant window,
+     *              and determines if PNF is required.
      * @returns {void}
      */
     handleQ3() {
@@ -202,9 +302,9 @@ export class PNFFlow {
 
         if (cpStartDateUTC.getTime() < this.APRIL_1_2023_UTC.getTime()) {
             this.showQuestion(3);
-        } else {
-            this.showResult(PNFFlow.NO_PNF_REQUIRED);
+            return;
         }
+        this.showResult(PNFFlow.NO_PNF_REQUIRED);
     }
 
     /**
