@@ -124,6 +124,28 @@ button.question__button[data-action='next'] {
     display: none;
 }
 
+.result-output__title {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-xs);
+}
+
+.result-output__desc {
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
+}
+
+.result-output__date {
+    font-weight: 600;
+    color: var(--color-bg-result);
+    background: var(--color-secondary-dark);
+    border-radius: var(--border-radius-small);
+    padding: 0 4px;
+}
+
 .result-output__text {
     font-size: 1.2em;
     font-weight: 700;
