@@ -61,10 +61,3 @@ The default IDs for this project are:
 1. Add the CSS and JS files to your project.
 2. Add the HTML structure to your page.
 3. Create a new instance of the `WidgetController` class, passing in the IDs of the HTML elements you want to use (Default or custom).
-
-# Assumptions
-
-- All accounting periods are exactly one year.
-- Claim Notification Period (CNP) starts at the accounting period start and ends 6 months after its end.
-- The last claim filing date is the actual date the user filed, not a derived date.
-- All decision logic is evaluated only after both the filing date and accounting period are provided.

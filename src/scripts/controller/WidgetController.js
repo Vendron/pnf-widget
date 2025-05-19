@@ -131,18 +131,24 @@ export class WidgetController {
             return;
         }
 
-        if (lastFilingDate < cnpStart && lastFilingDate >= april1_2023) {
+        
+        if (lastFilingDate < cnpStart) {
             this.view.showResult(true, cnpStart, cnpEnd);
             return;
         }
 
-        if (lastFilingDate > cnpEnd && lastFilingDate < april1_2023) {
+        if (lastFilingDate > cnpEnd || lastFilingDate < threeYearsPriorToCnpEnd) {
+            this.view.showResult(true, cnpStart, cnpEnd);
+            return;
+        }
+        
+        if (lastFilingDate >= threeYearsPriorToCnpEnd && lastFilingDate <= cnpEnd) {
             this.view.showResult(false, cnpStart, cnpEnd);
             return;
         }
 
-        if (cpStartDateRaw < april1_2023) {
-            this.view.showQuestion(3); // Q4
+        if (cnpStart < april1_2023) {
+            this.view.showQuestion(3);
             return;
         }
 
@@ -168,7 +174,7 @@ export class WidgetController {
         if (answer === 'yes') {
             this.view.showAlert('Please enter the date for the claim made before the one you just described');
             this.view.resetInputs(['lastFiling', 'cpStart', 'cpEnd']);
-            this.view.showQuestion(1);
+            this.view.showQuestion(2);
             return;
         }
         this.view.showResult(true);
