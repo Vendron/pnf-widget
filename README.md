@@ -64,5 +64,7 @@ The default IDs for this project are:
 
 # Assumptions
 
-- Assuming the Last filed claim date is the end of the last claim's Claim Notice Period (CNP).
-- To get the new CNP start, assume a year Period of Account (PoC) + 6 months.
+- All accounting periods are exactly one year.
+- Claim Notification Period (CNP) starts at the accounting period start and ends 6 months after its end.
+- The last claim filing date is the actual date the user filed, not a derived date.
+- All decision logic is evaluated only after both the filing date and accounting period are provided.
