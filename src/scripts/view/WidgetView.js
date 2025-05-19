@@ -192,7 +192,7 @@ export class WidgetView {
     _generateNoPNFRequiredHTML() {
         const title = 'No PNF Required.';
         const descContent =
-            'You do not need to submit a prenotification form to HMRC for your next claim. However, if you would like to anyway you can use our tool <a href="#" class="container__button">here!</a>';
+            'You do not need to submit a prenotification form to HMRC for your next claim. However, if you would like to anyway <a href="#" class="container__button">you can use our tool here!</a>';
 
         return `
             <div class="result-output__title-container">

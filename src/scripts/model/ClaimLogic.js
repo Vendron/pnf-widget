@@ -7,28 +7,20 @@ export class ClaimLogic {
 
     /**
      * @brief                                           Calculates the Claim Notification Period (CNP) start and end dates.
-     * @param {Date} cpStartDate                        Claim period start date
      * @param {Date} cpEndDate                          Claim period end date
      * @returns {{cnpStart: Date, cnpEnd: Date} | null} Returns CNP start and end dates or null if an error occurs.
      */
-    static calculateCNP(cpStartDate, cpEndDate) {
-        if (
-            !cpStartDate ||
-            !cpEndDate ||
-            !(cpStartDate instanceof Date) ||
-            !(cpEndDate instanceof Date) ||
-            isNaN(cpStartDate.getTime()) ||
-            isNaN(cpEndDate.getTime())
-        ) {
-            console.error('CalculateCNP: Invalid date objects provided.', { cpStartDate, cpEndDate });
+    static calculateCNP(cpEndDate) {
+        if (!cpEndDate || !(cpEndDate instanceof Date) || isNaN(cpEndDate.getTime())) {
+            console.error('CalculateCNP: Invalid date objects provided.', { cpEndDate });
             return null;
         }
-        const cnpEnd = addMonthsUTC(cpEndDate, 6);
-        if (!cnpEnd) {
-            console.error('CalculateCNP: addMonthsUTC failed to calculate cnpEnd.');
+        const cnpStart = addMonthsUTC(cpEndDate, -12 - 6); // 12 months (Period of Account) + 6 months
+        if (!cnpStart) {
+            console.error('CalculateCNP: addMonthsUTC failed to calculate cnpStart.');
             return null;
         }
-        return { cnpStart: cpStartDate, cnpEnd };
+        return { cnpStart: cnpStart, cnpEnd: cpEndDate };
     }
 
     /**

@@ -12,10 +12,6 @@ export class WidgetController {
     cpStartDate = null;
     /** @type {Date | null} */
     cpEndDate = null;
-    /** @type {Date | null} */
-    cnpStartDate = null;
-    /** @type {Date | null} */
-    cnpEndDate = null;
 
     constructor(view, { inputIds = { lastFiling: 'lastClaimFilingDate', cpStart: 'cpStartDate', cpEnd: 'cpEndDate' } } = {}) {
         this.view = view;
@@ -86,8 +82,6 @@ export class WidgetController {
             this.lastFilingDate = null;
             this.cpStartDate = null;
             this.cpEndDate = null;
-            this.cnpStartDate = null;
-            this.cnpEndDate = null;
             this.view.resetInputs(['lastFiling', 'cpStart', 'cpEnd']);
             this.view.showQuestion(1);
             return;
@@ -100,51 +94,27 @@ export class WidgetController {
      * @returns {void}
      */
     handleQ2Next() {
-        const lastFilingDateRaw = this.getValidatedUTCDate('lastFiling', 'Please enter the date you filed the last claim.');
+        const lastFilingDateRaw = this.getValidatedUTCDate('lastFiling', 'Please enter the last claim filing date.');
         if (!lastFilingDateRaw) return;
 
-        this.lastFilingDate = lastFilingDateRaw;
-        this.cnpStartDate = lastFilingDateRaw;
-        this.cnpEndDate = addMonthsUTC(lastFilingDateRaw, 6);
+        const cnpEnd = lastFilingDateRaw; // Assume the CNP end date is the last filing date
+        const cnpStart = addMonthsUTC(cnpEnd, -12 - 6); // 12 months + 6 months (Period of Account starts 18 months before)
+        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC;
+        const threeYearsPrior = subtractYearsUTC(cnpEnd, 3);
 
-        if (!this.cnpEndDate) {
-            this.view.showAlert('Could not calculate Claim Notification Period end date.');
-            return;
-        }
+        if (lastFilingDateRaw < threeYearsPrior) return this.view.showResult(true, cnpStart, cnpEnd);
+        // Filed before CNP started
+        if (lastFilingDateRaw < cnpStart) return this.view.showResult(true, cnpStart, cnpEnd);
+        // Filing was before April 1, 2023 -> no PNF required
+        if (lastFilingDateRaw < april1_2023) return this.view.showResult(false, cnpStart, cnpEnd);
 
-        const filingTime = this.lastFilingDate.getTime();
-        const cnpStartTime = this.cnpStartDate.getTime();
-        const cnpEndTime = this.cnpEndDate.getTime();
-        const todayUTC = toUTC(new Date());
-        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC.getTime();
-
-        const minRelevantDate = subtractYearsUTC(todayUTC, 3);
-        if (minRelevantDate && filingTime < minRelevantDate.getTime()) {
-            this.view.showResult(true, this.cnpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (filingTime < cnpStartTime) {
-            this.view.showResult(true, this.cnpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (filingTime > cnpEndTime && filingTime < april1_2023) {
-            this.view.showResult(false, this.cnpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (filingTime > cnpEndTime && filingTime >= april1_2023) {
-            this.view.showResult(false, this.cnpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        this.view.resetInputs(['cpStart', 'cpEnd']);
-        this.view.showQuestion(2);
+        // Filing was after April 1, 2023 -> PNF required
+        return this.view.showQuestion(2);
     }
 
     /**
-     * @brief Calculates the Claim Notification Period (CNP) and determines if a PNF is required.
+     * @brief           Handles the logic for Question 3: Claim Period (CP) dates. Determines if a PNF is required based on
+     *                  the CP start date relative to April 1, 2023.
      * @returns {void}
      */
     handleQ3Next() {
@@ -161,15 +131,20 @@ export class WidgetController {
         this.cpStartDate = cpStartDateRaw;
         this.cpEndDate = cpEndDateRaw;
 
-        const cpStartTime = cpStartDateRaw.getTime();
-        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC.getTime();
-
-        if (cpStartTime < april1_2023) {
-            this.view.showQuestion(3);
+        if (!ClaimLogic.APRIL_1_2023_UTC) {
+            this.view.showAlert('Critical error: April 1, 2023 reference date is not set.');
             return;
         }
 
-        this.view.showResult(false);
+        if (this.cpStartDate >= ClaimLogic.APRIL_1_2023_UTC) {
+            this.view.showResult(false, this.cpStartDate, this.cpEndDate);
+            return;
+        }
+
+        if (this.cpStartDate < ClaimLogic.APRIL_1_2023_UTC) {
+            this.view.showQuestion(3);
+            return;
+        }
     }
 
     /**
