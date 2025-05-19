@@ -32,6 +32,26 @@ export class ClaimLogic {
     }
 
     /**
+     * @brief                       Checks if a filing date is relevant (within 3-year CNP window)
+     * @param {Date} filingDate     The date the last R&D claim was filed
+     * @param {Date} todayUTC       The current UTC date
+     * @returns {boolean}           True if filing date is within the 3-year window and CNP is not expired
+     */
+    static isFilingDateRelevant(filingDate, todayUTC) {
+        if (!filingDate || !todayUTC) return false;
+
+        const assumedCnpEnd = addMonthsUTC(filingDate, 6);
+
+        if (!assumedCnpEnd) return false;
+
+        const minRelevantDate = subtractYearsUTC(todayUTC, 3);
+
+        if (!minRelevantDate) return false;
+
+        return filingDate.getTime() >= minRelevantDate.getTime() && assumedCnpEnd.getTime() >= todayUTC.getTime();
+    }
+
+    /**
      * @brief                       Validates that the claim period start date is before the end date.
      * @param {Date} cpStartDate    Claim period start date.
      * @param {Date} cpEndDate      Claim period end date.

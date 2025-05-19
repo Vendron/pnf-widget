@@ -1,5 +1,5 @@
 import { ClaimLogic } from '../model/ClaimLogic.js';
-import { subtractYearsUTC, toUTC } from '../utils/dateUtils.js';
+import { addMonthsUTC, subtractYearsUTC, toUTC } from '../utils/dateUtils.js';
 
 export class WidgetController {
     /** @type {import('../view/WidgetView.js').WidgetView} */
@@ -53,14 +53,14 @@ export class WidgetController {
         if (this.view.questions.length > 3 && this.view.questions[3]) {
             this.view.on(this.view.questions[3], 'click', '[data-submission]', (e) => {
                 const submissionType = /** @type {HTMLElement} */ (e.target).dataset.submission;
-                this.handleQ4Submission(submissionType);
+                this.handleQ4Next(submissionType);
             });
         }
 
         if (this.view.questions.length > 4 && this.view.questions[4]) {
             this.view.on(this.view.questions[4], 'click', '[data-everclaimed]', (e) => {
                 const everClaimed = /** @type {HTMLElement} */ (e.target).dataset.everclaimed;
-                this.handleQ5EverClaimed(everClaimed);
+                this.handleQ5Next(everClaimed);
             });
         }
     }
@@ -101,14 +101,44 @@ export class WidgetController {
      */
     handleQ2Next() {
         const lastFilingDateRaw = this.getValidatedUTCDate('lastFiling', 'Please enter the date you filed the last claim.');
-
         if (!lastFilingDateRaw) return;
 
         this.lastFilingDate = lastFilingDateRaw;
-        this.cpStartDate = null;
-        this.cpEndDate = null;
-        this.cnpStartDate = null;
-        this.cnpEndDate = null;
+        this.cnpStartDate = lastFilingDateRaw;
+        this.cnpEndDate = addMonthsUTC(lastFilingDateRaw, 6);
+
+        if (!this.cnpEndDate) {
+            this.view.showAlert('Could not calculate Claim Notification Period end date.');
+            return;
+        }
+
+        const filingTime = this.lastFilingDate.getTime();
+        const cnpStartTime = this.cnpStartDate.getTime();
+        const cnpEndTime = this.cnpEndDate.getTime();
+        const todayUTC = toUTC(new Date());
+        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC.getTime();
+
+        const minRelevantDate = subtractYearsUTC(todayUTC, 3);
+        if (minRelevantDate && filingTime < minRelevantDate.getTime()) {
+            this.view.showResult(true, this.cnpStartDate, this.cnpEndDate);
+            return;
+        }
+
+        if (filingTime < cnpStartTime) {
+            this.view.showResult(true, this.cnpStartDate, this.cnpEndDate);
+            return;
+        }
+
+        if (filingTime > cnpEndTime && filingTime < april1_2023) {
+            this.view.showResult(false, this.cnpStartDate, this.cnpEndDate);
+            return;
+        }
+
+        if (filingTime > cnpEndTime && filingTime >= april1_2023) {
+            this.view.showResult(false, this.cnpStartDate, this.cnpEndDate);
+            return;
+        }
+
         this.view.resetInputs(['cpStart', 'cpEnd']);
         this.view.showQuestion(2);
     }
@@ -131,70 +161,15 @@ export class WidgetController {
         this.cpStartDate = cpStartDateRaw;
         this.cpEndDate = cpEndDateRaw;
 
-        if (!this.lastFilingDate) {
-            this.view.showAlert('Last filing date is missing. Please go back to the previous step.');
-            this.view.showQuestion(1);
-            return;
-        }
-        if (!ClaimLogic.APRIL_1_2023_UTC) {
-            this.view.showAlert('Critical error: April 1, 2023 reference date is not set.');
-            return;
-        }
+        const cpStartTime = cpStartDateRaw.getTime();
+        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC.getTime();
 
-        const cnp = ClaimLogic.calculateCNP(this.cpStartDate, this.cpEndDate);
-        if (!cnp) {
-            this.view.showAlert('Could not calculate Claim Notification Period. Please check dates.');
-            return;
-        }
-        this.cnpStartDate = cnp.cnpStart;
-        this.cnpEndDate = cnp.cnpEnd;
-
-        const lastFilingTime = this.lastFilingDate.getTime();
-        const cnpStartTime = this.cnpStartDate.getTime();
-        const cnpEndTime = this.cnpEndDate.getTime();
-        const april1_2023_Time = ClaimLogic.APRIL_1_2023_UTC.getTime();
-        const cpStartTime = this.cpStartDate.getTime();
-
-        if (lastFilingTime < cnpStartTime) {
-            this.view.showResult(true, this.cpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (lastFilingTime > cnpEndTime && lastFilingTime < april1_2023_Time) {
-            this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (lastFilingTime > cnpEndTime && lastFilingTime >= april1_2023_Time && cpStartTime < april1_2023_Time) {
+        if (cpStartTime < april1_2023) {
             this.view.showQuestion(3);
             return;
         }
 
-        if (lastFilingTime > cnpEndTime && lastFilingTime >= april1_2023_Time) {
-            this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        const threeYearsPriorToCnpEnd = subtractYearsUTC(this.cnpEndDate, 3);
-        if (!threeYearsPriorToCnpEnd) {
-            this.view.showAlert('Error calculating 3-year relevance window for CNP.');
-            return;
-        }
-        const relevantFilingWindowStart = new Date(threeYearsPriorToCnpEnd.getTime());
-        relevantFilingWindowStart.setUTCDate(relevantFilingWindowStart.getUTCDate() + 1);
-        const relevantFilingWindowStartTime = relevantFilingWindowStart.getTime();
-
-        if (lastFilingTime < relevantFilingWindowStartTime) {
-            this.view.showResult(true, this.cpStartDate, this.cnpEndDate);
-            return;
-        }
-
-        if (cpStartTime < april1_2023_Time) {
-            this.view.showQuestion(3);
-            return;
-        }
-
-        this.view.showResult(false, this.cpStartDate, this.cnpEndDate);
+        this.view.showResult(false);
     }
 
     /**
@@ -202,7 +177,7 @@ export class WidgetController {
      * @param {string | undefined} submissionType   ('original' or 'amended').
      * @returns {void}
      */
-    handleQ4Submission(submissionType) {
+    handleQ4Next(submissionType) {
         if (submissionType === 'amended') this.view.showQuestion(4);
         if (submissionType === 'original') this.view.showResult(false);
     }
@@ -212,7 +187,7 @@ export class WidgetController {
      * @param {string | undefined} answer   ('yes' or 'no').
      * @returns {void}
      */
-    handleQ5EverClaimed(answer) {
+    handleQ5Next(answer) {
         if (answer === 'yes') {
             this.view.showAlert('Please enter the date for the claim made before the one you just described');
             this.view.resetInputs(['lastFiling', 'cpStart', 'cpEnd']);
