@@ -94,22 +94,11 @@ export class WidgetController {
      * @returns {void}
      */
     handleQ2Next() {
-        const lastFilingDateRaw = this.getValidatedUTCDate('lastFiling', 'Please enter the last claim filing date.');
+        const lastFilingDateRaw = this.getValidatedUTCDate('lastFiling', 'Please enter the date you filed the last claim.');
         if (!lastFilingDateRaw) return;
 
-        const cnpEnd = lastFilingDateRaw; // Assume the CNP end date is the last filing date
-        const cnpStart = addMonthsUTC(cnpEnd, -12 - 6); // 12 months + 6 months (Period of Account starts 18 months before)
-        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC;
-        const threeYearsPrior = subtractYearsUTC(cnpEnd, 3);
-
-        if (lastFilingDateRaw < threeYearsPrior) return this.view.showResult(true, cnpStart, cnpEnd);
-        // Filed before CNP started
-        if (lastFilingDateRaw < cnpStart) return this.view.showResult(true, cnpStart, cnpEnd);
-        // Filing was before April 1, 2023 -> no PNF required
-        if (lastFilingDateRaw < april1_2023) return this.view.showResult(false, cnpStart, cnpEnd);
-
-        // Filing was after April 1, 2023 -> PNF required
-        return this.view.showQuestion(2);
+        this.lastFilingDate = lastFilingDateRaw;
+        this.view.showQuestion(2);
     }
 
     /**
@@ -131,20 +120,33 @@ export class WidgetController {
         this.cpStartDate = cpStartDateRaw;
         this.cpEndDate = cpEndDateRaw;
 
-        if (!ClaimLogic.APRIL_1_2023_UTC) {
-            this.view.showAlert('Critical error: April 1, 2023 reference date is not set.');
+        const cnpStart = this.cpStartDate;
+        const cnpEnd = addMonthsUTC(this.cpEndDate, 6);
+        const lastFilingDate = this.lastFilingDate;
+        const april1_2023 = ClaimLogic.APRIL_1_2023_UTC;
+        const threeYearsPriorToCnpEnd = subtractYearsUTC(cnpEnd, 3);
+
+        if (!lastFilingDate || !cnpEnd || !threeYearsPriorToCnpEnd) {
+            this.view.showAlert('Internal error: date calculation failed.');
             return;
         }
 
-        if (this.cpStartDate >= ClaimLogic.APRIL_1_2023_UTC) {
-            this.view.showResult(false, this.cpStartDate, this.cpEndDate);
+        if (lastFilingDate < cnpStart && lastFilingDate >= april1_2023) {
+            this.view.showResult(true, cnpStart, cnpEnd);
             return;
         }
 
-        if (this.cpStartDate < ClaimLogic.APRIL_1_2023_UTC) {
-            this.view.showQuestion(3);
+        if (lastFilingDate > cnpEnd && lastFilingDate < april1_2023) {
+            this.view.showResult(false, cnpStart, cnpEnd);
             return;
         }
+
+        if (cpStartDateRaw < april1_2023) {
+            this.view.showQuestion(3); // Q4
+            return;
+        }
+
+        this.view.showResult(false, cnpStart, cnpEnd);
     }
 
     /**
